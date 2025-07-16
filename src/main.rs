@@ -9,7 +9,7 @@ use axum::{
 use clap::Parser;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tokio::sync::{mpsc, watch};
 use tracing::{Level, error, info};
@@ -50,7 +50,8 @@ pub struct PoolStats {
 
 #[derive(Debug, Serialize, Default, Clone)]
 pub struct AllStats {
-    pools: HashMap<String, PoolStats>,
+    // using BTreeMap instead of HashMap to keep the stats sorted by pool name
+    pools: BTreeMap<String, PoolStats>,
 }
 
 #[derive(Clone)]
@@ -137,7 +138,7 @@ async fn data_actor(
 
                         (pool_name.clone(), pool_stats)
                     })
-                    .collect::<HashMap<_, _>>();
+                    .collect::<BTreeMap<_, _>>();
 
                 // Step 4: Assemble the final stats object and publish it.
                 let current_stats = AllStats { pools };
